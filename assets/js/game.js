@@ -1,17 +1,29 @@
 //Start Game//
 
 //Click start button to make disappear/begin game
-$("#start").on("click", function () {
+$("#start").on("click", function(){
     $("#start").remove();
-    game.loadQuestion();
+    triviaGame.loadQuestion();
 })
 
 $(document).on("click","#reset",function(){
-    game.reset();
+    triviaGame.reset();
 })
 
+$("#game-container").on("click", ".choice", function(){
+    var userChoice = $(this).text()
+    triviaGame.clickedAnswer(userChoice);
+    
+})
+
+$("#game-container").on("click", ".nextQuestion", function(){
+    
+})
+
+// countDown = 30
+
 var triviaGame = {
-    questions: questions, 
+    questionsArray: 0, 
     currentQuestion: 0, 
     
     //Counters
@@ -22,115 +34,127 @@ var triviaGame = {
 
     //Methods
         //Countdown timer
-        countdown: function (){
-            game.countDown--;
-            $("#countDown").html(game.countDown);
-            if(game.countDown<=0){
-                console.log("Time up!");
-                game.timesUp();
+        countIt: function(){
+            console.log(triviaGame.countDown)
+            triviaGame.countDown--;
+            $("#countDown").html(triviaGame.countDown);
+
+            if(triviaGame.countDown<=0){
+                console.log("Time's up!");
+                triviaGame.timesUp();
             }
         },
 
         //Timed out (question not answered)
-        timesUp: function (){
+        timesUp: function(){
             clearInterval(timer);
-            game.timedOut++;
+            this.timedOut++;
             $("#game-container").html("<h2>Time's Up!</h2>");
-            $("#game-container").append("<h3>Correct Answer: " + questions[game.currentQuestion].correctAnswer + "</h3>");
-            if(game.currentQuestion === questions.length-1){
-                signalTimesUp(game.results,4000);
+            $("#game-container").append("<h3>Correct Answer: " + questionsArray[this.currentQuestion].correctAnswer + "</h3>");
+            if(this.currentQuestion === questionsArray.length){
+                signalTimesUp(this.results,4000);
             }
             else {
-                signalTimesUp(game.goToNextQuestion,4000);
+                signalTimesUp(triviaGame.goToNextQuestion,4000);
             }
         },
 
         //Click on answer
-        clickedAnswer: function (){
+        clickedAnswer: function(userChoice){
             clearInterval(timer);
             
-            if(questions[game.currentQuestion].correctAnswer){
-                game.answerCorrect();
+            if(questionsArray[this.currentQuestion].correctAnswer === userChoice){
+                this.answerCorrect();
                 console.log("correct");
             } 
             else {
-                game.answerIncorrect();
+                this.answerIncorrect();
                 console.log("wrong");
             }
         },
 
         //Answer is correct
-        answerCorrect: function (){
+        answerCorrect: function(){
             clearInterval(timer);
-            game.correct++;
+            this.correct++;
             $("#game-container").html("<h2>Correct!</h2>");
-            $("#game-container").append("<h3>Correct Answer: " + questions[game.currentQuestion].correctAnswer + "</h3>");
-            if(game.currentQuestion === questions.length-1){
-                signalTimesUp(game.results,4000);
+            $("#game-container").append("<h3>Correct Answer: " + questionsArray[this.currentQuestion].correctAnswer + "</h3>");
+            if(this.currentQuestion === questionsArray.length-1){
+                signalTimesUp(this.results,4000);
             }
             else {
-                signalTimesUp(game.goToNextQuestion,4000);
+                signalTimesUp(this.goToNextQuestion,4000);
             }
         },
 
         //Answer is incorrect
-        answerIncorrect: function (){
+        answerIncorrect: function(){
             clearInterval(timer);
-            game.incorrect++;
+            this.incorrect++;
             $("#game-container").html("<h2>Wrong Answer!</h2>");
-            $("#game-container").append("<h3>Correct Answer: " + questions[game.currentQuestion].correctAnswer + "</h3>");
-            if(game.currentQuestion === questions.length-1){
-                signalTimesUp(game.results,4000);
+            $("#game-container").append("<h3>Correct Answer: " + questionsArray[this.currentQuestion].correctAnswer + "</h3>");
+            if(this.currentQuestion === questionsArray.length-1){
+                signalTimesUp(this.results,4000);
             }
             else {
-                signalTimesUp(game.goToNextQuestion,4000);
+                signalTimesUp(this.goToNextQuestion,4000);
             }
         },
         
         //!!!!!!!!!Current question loads
-        loadQuestion: function (){
+        loadQuestion: function(){
             //Tick timer down by 1 second and display on page
-            $("#game-container").html("<h2>Time Remaining: <span id='countDown'>30</span> sec</h2>");
-            timer = setInterval(game.countDown,1000);
+            // $("#game-container").html("<h2>Time Remaining: <span id='countDown'>30</span> sec</h2>");
+            timer = setInterval(this.countIt, 1000);
+
+            var questionHTML = $("<div>")
 
             //Show current question on page
-            $("#game-container").html("<h2>" + questions[game.currentQuestion].question + "</h2>");
+            questionHTML.append("<h2>" + questionsArray[this.currentQuestion].question + "</h2>");
 
             //Show possible answers (from individual question arrays) on page as buttons
-            for(var i=0; i<questions[game.currentQuestion].answers.length; i++){
+            var answers = questionsArray[this.currentQuestion].answers;
+            for(var i=0; i<answers.length; i++){
                 //Makes buttons with 4 possible answers
-                $("game-container").append("<button></button>");
+                questionHTML.append("<button class='choice'>" + answers[i] + "</button>");
             }
+
+            $("#game-container").append(questionHTML);
+            $("#loadQuestion").append("<div class='nextQuestion'>" + questionsArray[i] + "</div>");
         },
 
 
         //Move on to next question (without prompt from user)
-        goToNextQuestion: function () {
-            game.countDown = 30;
-            $("#countDown").html(game.countDown);
-            game.currentQuestion++;
-            game.loadQuestion();
+        goToNextQuestion: function(){
+            triviaGame.countDown = 30;
+            $("#countDown").html(triviaGame.countDown);
+            triviaGame.currentQuestion++;
         },
 
         //Game results show on the page
-        results: function (){
+        results: function(){
             clearInterval(timer);
+            //Results page message
             $("#game-container").html("<h2>You made it to the end!</h2>");
-            $("#game-container").append("<h3>Correct: " + game.correct + "</h3>");
-            $("#game-container").append("<h3>Wrong: " + game.incorrect + "</h3>");
-            $("#game-container").append("<h3>Unanswered: " + game.timedOut + "</h3>");
+            //Correct answers counter
+            $("#game-container").append("<h3>Correct: " + this.correct + "</h3>");
+            //Incorrect answers counter
+            $("#game-container").append("<h3>Wrong: " + this.incorrect + "</h3>");
+            //Unanswered counter
+            $("#game-container").append("<h3>Unanswered: " + this.timedOut + "</h3>");
+            //Reset game button
             $("#game-container").append("<button id='reset'>Take It Again!</button>");
         },
 
         //Game reset without page refresh
-        reset: function (){
+        reset: function(){
             clearInterval(timer);
-            $("#game-container").html(game.)
-        } 
+            // $("#game-container").html(this.???);
+        }, 
 }
 
 //Questions bank
-var questions = [{
+var questionsArray = [{
     question: "Rick and Morty is based on what 80s sci-fi movie classic?",
     answers: ["Blade Runner", "Aliens", "Tron", "Back to the Future"],
     correctAnswer: "Back to the Future",
