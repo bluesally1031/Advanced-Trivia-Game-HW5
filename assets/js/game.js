@@ -1,3 +1,8 @@
+//Peter's black magic JS
+function signalTimesUp (nextFn){
+    nextFn.call(triviaGame);
+}
+
 //Start Game//
 
 //Click start button to make disappear/begin game
@@ -13,14 +18,7 @@ $(document).on("click","#reset",function(){
 $("#game-container").on("click", ".choice", function(){
     var userChoice = $(this).text()
     triviaGame.clickedAnswer(userChoice);
-    
 })
-
-$("#game-container").on("click", ".nextQuestion", function(){
-    
-})
-
-// countDown = 30
 
 var triviaGame = {
     questionsArray: 0, 
@@ -33,6 +31,7 @@ var triviaGame = {
     timedOut: 0,
 
     //Methods
+
         //Countdown timer
         countIt: function(){
             console.log(triviaGame.countDown)
@@ -79,7 +78,7 @@ var triviaGame = {
             this.correct++;
             $("#game-container").html("<h2>Correct!</h2>");
             $("#game-container").append("<h3>Correct Answer: " + questionsArray[this.currentQuestion].correctAnswer + "</h3>");
-            if(this.currentQuestion === questionsArray.length-1){
+            if(this.currentQuestion === questionsArray.length){
                 signalTimesUp(this.results,4000);
             }
             else {
@@ -93,7 +92,7 @@ var triviaGame = {
             this.incorrect++;
             $("#game-container").html("<h2>Wrong Answer!</h2>");
             $("#game-container").append("<h3>Correct Answer: " + questionsArray[this.currentQuestion].correctAnswer + "</h3>");
-            if(this.currentQuestion === questionsArray.length-1){
+            if(this.currentQuestion === questionsArray.length){
                 signalTimesUp(this.results,4000);
             }
             else {
@@ -101,10 +100,9 @@ var triviaGame = {
             }
         },
         
-        //!!!!!!!!!Current question loads
+        //Current question loads
         loadQuestion: function(){
             //Tick timer down by 1 second and display on page
-            // $("#game-container").html("<h2>Time Remaining: <span id='countDown'>30</span> sec</h2>");
             timer = setInterval(this.countIt, 1000);
 
             var questionHTML = $("<div>")
@@ -129,27 +127,27 @@ var triviaGame = {
             triviaGame.countDown = 30;
             $("#countDown").html(triviaGame.countDown);
             triviaGame.currentQuestion++;
+            this.loadQuestion();
         },
 
         //Game results show on the page
         results: function(){
             clearInterval(timer);
             //Results page message
-            $("#game-container").html("<h2>You made it to the end!</h2>");
+            $("#results-container").html("<h2>You made it to the end!</h2>");
             //Correct answers counter
-            $("#game-container").append("<h3>Correct: " + this.correct + "</h3>");
+            $("#results-container").html("<h3>Correct: " + this.correct + "</h3>");
             //Incorrect answers counter
-            $("#game-container").append("<h3>Wrong: " + this.incorrect + "</h3>");
+            $("#results-container").html("<h3>Wrong: " + this.incorrect + "</h3>");
             //Unanswered counter
-            $("#game-container").append("<h3>Unanswered: " + this.timedOut + "</h3>");
+            $("#results-container").html("<h3>Unanswered: " + this.timedOut + "</h3>");
             //Reset game button
-            $("#game-container").append("<button id='reset'>Take It Again!</button>");
+            $("#results-container").html("<button id='reset'>Take It Again!</button>");
         },
 
         //Game reset without page refresh
         reset: function(){
             clearInterval(timer);
-            // $("#game-container").html(this.???);
         }, 
 }
 
